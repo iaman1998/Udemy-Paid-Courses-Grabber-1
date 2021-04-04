@@ -69,9 +69,24 @@ def get_course_coupon(url):
         return ''
 
 def free_checkout(CHECKOUT, access_token, csrftoken, coupon, courseID, cookies, head):
-    payload = '{"shopping_cart":{"items":[{"buyableType":"course","buyableId":' + str(courseID) + ',"discountInfo":{"code":"' + coupon + '"},"purchasePrice":{"currency":"INR","currency_symbol":"","amount":0,"price_string":"Free"},"buyableContext":{"contentLocaleId":null}}]},"payment_info":{"payment_vendor":"Free","payment_method":"free-method"}}'
-
-    r = requests.post(CHECKOUT, headers=head, data=payload, cookies=cookies, verify=False)
+    #payload = '{"shopping_cart":{"items":[{"buyableType":"course","buyableId":' + str(courseID) + ',"discountInfo":{"code":"' + coupon + '"},"purchasePrice":{"currency":"INR","currency_symbol":"","amount":0,"price_string":"Free"},"buyableContext":{"contentLocaleId":null}}]},"payment_info":{"payment_vendor":"Free","payment_method":"free-method"}}'
+    payload = {
+            "checkout_event": "Submit",
+            "checkout_environment": "Marketplace",
+            "shopping_info": {
+                "items": [
+                    {
+                        "discountInfo": {"code": coupon},
+                        "buyable": {"type": "course", "id": courseID, "context": {}},
+                        "price": {"amount": 0, "currency": "INR"},
+                    }
+                ],
+                "is_cart": True,
+            },
+            "payment_info": {"payment_vendor": "Free", "payment_method": "free-method"}
+        }
+    #r = requests.post(CHECKOUT, headers=head, data=payload, cookies=cookies, verify=False)
+    r = requests.post(CHECKOUT, headers=head, json=payload, cookies=cookies, verify=False)
     return r.json()
 
 def free_enroll(courseID, access_token, cookies, csrftoken, head):
